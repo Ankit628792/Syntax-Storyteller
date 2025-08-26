@@ -67,3 +67,9 @@ Made with ❤️ by [Ankit](https://ak-portfolio.vercel.app)
 - **Portfolio**: [Ankit Kumar](https://ak-portfolio.vercel.app)
 - **VS Code Marketplace**: [Download Extension](https://marketplace.visualstudio.com/items?itemName=Ankit628792.syntax-storyteller)
 
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
+
