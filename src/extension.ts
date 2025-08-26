@@ -1,26 +1,100 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { generateStory, styles as availableStyles } from "./storyteller";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	console.log("Syntax Storyteller activated");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "syntax-storyteller" is now active!');
+	const disposable = vscode.commands.registerCommand(
+		"syntaxStoryteller.tellStory",
+		async () => {
+			const editor = vscode.window.activeTextEditor;
+			if (!editor) {
+				vscode.window.showInformationMessage("Open a file to tell its story!");
+				return;
+			}
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('syntax-storyteller.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from syntax-storyteller!');
-	});
+			const selection = editor.selection;
+			const code = editor.document.getText(selection);
+			if (!code || code.trim().length === 0) {
+				vscode.window.showInformationMessage("Please select some code first.");
+				return;
+			}
+
+			const style = await vscode.window.showQuickPick(availableStyles, {
+				placeHolder: "Choose your storytelling style",
+			});
+			if (!style) return;
+
+			// generate story text
+			const story = generateStory(style, code);
+
+			// split into intro/outro
+			const lines = story.split("\n").filter((l) => l.trim().length > 0);
+			const intro = lines.shift() ?? "";
+			const outro = lines.join(" ") || "";
+
+			// comment delimiters per language
+			type CommentStyle = { line?: string; blockStart?: string; blockEnd?: string };
+			const commentMap: Record<string, CommentStyle> = {
+				javascript: { blockStart: "/*", blockEnd: "*/" },
+				typescript: { blockStart: "/*", blockEnd: "*/" },
+				json: { line: "//" },
+				jsonc: { line: "//" },
+				python: { line: "#" },
+				ruby: { line: "#" },
+				shellscript: { line: "#" },
+				bash: { line: "#" },
+				powershell: { line: "#" },
+				yaml: { line: "#" },
+				toml: { line: "#" },
+				ini: { line: ";" },
+				c: { blockStart: "/*", blockEnd: "*/" },
+				cpp: { blockStart: "/*", blockEnd: "*/" },
+				java: { blockStart: "/*", blockEnd: "*/" },
+				csharp: { blockStart: "/*", blockEnd: "*/" },
+				go: { blockStart: "/*", blockEnd: "*/" },
+				php: { blockStart: "/*", blockEnd: "*/" },
+				css: { blockStart: "/*", blockEnd: "*/" },
+				scss: { blockStart: "/*", blockEnd: "*/" },
+				less: { blockStart: "/*", blockEnd: "*/" },
+				html: { blockStart: "<!--", blockEnd: "-->" },
+				xml: { blockStart: "<!--", blockEnd: "-->" },
+				vue: { blockStart: "<!--", blockEnd: "-->" },
+				rust: { line: "//" },
+				swift: { blockStart: "/*", blockEnd: "*/" },
+				kotlin: { blockStart: "/*", blockEnd: "*/" },
+				scala: { blockStart: "/*", blockEnd: "*/" },
+				dart: { blockStart: "/*", blockEnd: "*/" },
+			};
+
+			const cs = commentMap[editor.document.languageId] ?? { blockStart: "/*", blockEnd: "*/" };
+
+			function wrapComment(text: string) {
+				if (!text.trim()) return "";
+				if (cs.blockStart && cs.blockEnd) {
+					return `${cs.blockStart}\n${text}\n${cs.blockEnd}\n`;
+				} else if (cs.line) {
+					return text
+						.split("\n")
+						.map((l) => `${cs.line} ${l}`)
+						.join("\n") + "\n";
+				} else {
+					return `/*\n${text}\n*/\n`;
+				}
+			}
+
+			const introBlock = wrapComment(intro);
+			const outroBlock = wrapComment(outro);
+
+			// insert intro before selection, outro after selection
+			await editor.edit((eb) => {
+				eb.insert(selection.start, introBlock);
+				eb.insert(selection.end, "\n" + outroBlock);
+			});
+		}
+	);
 
 	context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

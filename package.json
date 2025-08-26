@@ -1,37 +1,51 @@
 {
   "name": "syntax-storyteller",
-  "displayName": "syntax-storyteller",
+  "displayName": "Syntax Storyteller 📖",
   "description": "Turns your code into fun narratives — Fantasy, Sci-Fi, Noir, Shakespeare and more!",
   "version": "0.0.1",
+  "publisher": "Ankit628792",
+  "author": {
+    "name": "Ankit Kumar",
+    "username": "Ankit628792",
+    "url": "https://ak-portfolio.vercel.app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ankit628792/Jira-GitHub-Linker.git"
+  },
   "engines": {
     "vscode": "^1.103.0"
   },
+  "icon": "media/icon.png",
   "categories": [
-    "Other"
+    "Other",
+    "AI",
+    "Chat"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "syntax-storyteller.helloWorld",
-        "title": "Hello World"
+        "command": "syntaxStoryteller.tellStory",
+        "title": "Story: Tell me a Syntax Story 📖 "
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "syntaxStoryteller.tellStory",
+          "when": "editorHasSelection",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run package",
-    "compile": "yarn run check-types && yarn run lint && node esbuild.js",
-    "watch": "npm-run-all -p watch:*",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "yarn run check-types && yarn run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p . --outDir dist",
+    "watch": "tsc -p . --outDir dist --watch",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/vscode": "^1.103.0",
